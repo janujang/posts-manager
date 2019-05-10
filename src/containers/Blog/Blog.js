@@ -8,7 +8,8 @@ import axios from 'axios';
 
 class Blog extends Component {
     state = {
-        posts: []
+        posts: [],
+        selectedPostId: null
     }
     componentDidMount(){
         //can't do const posts = axios.get() because axios.get() is asynchronous and JS runs code synchronously.
@@ -18,13 +19,27 @@ class Blog extends Component {
         //Promise is returned by .get()
         axios.get('https://jsonplaceholder.typicode.com/posts')
         .then(response => {
-            this.setState({posts: response.data});
+            const posts = response.data.slice(0,4);
+            const updatedPosts = posts.map(post =>{
+                return {
+                ...post,
+                author: 'Max'
+                }
+
+            });
+            this.setState({posts: updatedPosts});
             console.log(response);
         });
     }
+    postSelectedHandler = (id) => {
+        this.setState({selectedPostId: id});
+    }
     render () {
         const posts = this.state.posts.map(post =>
-            <Post title={post.title} key={post.id}/>
+            <Post title={post.title} 
+                    key={post.id}
+                    author={post.author}
+                    clicked={() => this.postSelectedHandler(post.id)}/>
         );
         return (
             <div>
@@ -32,7 +47,7 @@ class Blog extends Component {
                     {posts}
                 </section>
                 <section>
-                    <FullPost />
+                    <FullPost id={this.state.selectedPostId} />
                 </section>
                 <section>
                     <NewPost />
