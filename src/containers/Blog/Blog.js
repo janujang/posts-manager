@@ -1,57 +1,48 @@
 import React, { Component } from 'react';
+// import axios from 'axios';
+import { Route, NavLink, Switch } from 'react-router-dom';
 
-import Post from '../../components/Post/Post';
-import FullPost from '../../components/FullPost/FullPost';
-import NewPost from '../../components/NewPost/NewPost';
 import './Blog.css';
-import axios from 'axios';
+import Posts from './Posts/Posts';
+import NewPost from './NewPost/NewPost';
+import FullPost from './FullPost/FullPost';
 
 class Blog extends Component {
-    state = {
-        posts: [],
-        selectedPostId: null
-    }
-    componentDidMount(){
-        //can't do const posts = axios.get() because axios.get() is asynchronous and JS runs code synchronously.
-        //This means that JS won't wait for the data to be fetched
-
-        //Function in then is executed once the promise is resolved
-        //Promise is returned by .get()
-        axios.get('/posts')
-        .then(response => {
-            const posts = response.data.slice(0,4);
-            const updatedPosts = posts.map(post =>{
-                return {
-                ...post,
-                author: 'Max'
-                }
-
-            });
-            this.setState({posts: updatedPosts});
-            console.log(response);
-        });
-    }
-    postSelectedHandler = (id) => {
-        this.setState({selectedPostId: id});
-    }
     render () {
-        const posts = this.state.posts.map(post =>
-            <Post title={post.title} 
-                    key={post.id}
-                    author={post.author}
-                    clicked={() => this.postSelectedHandler(post.id)}/>
-        );
         return (
-            <div>
-                <section className="Posts">
-                    {posts}
-                </section>
-                <section>
-                    <FullPost id={this.state.selectedPostId} />
-                </section>
-                <section>
-                    <NewPost />
-                </section>
+            <div className="Blog">
+                <header>
+                    <nav>
+                        <ul>
+                            {/*exact means full path is '/' */}
+                            <li><NavLink 
+                                    to="/" 
+                                    exact
+                                    activeClassName="my-active"
+                                    activeStyle={{
+                                        color: '#fa923f'
+                                    }}>Home</NavLink></li>
+                            <li><NavLink 
+                                to={{
+                                //relative path when /new-post added to current url
+                                //below is an absolute path 
+                                pathname: '/new-post',
+                                hash: '#submit',
+                                search: '?quick-submit=true'
+                                }}
+                                activeStyle={{
+                                    color: '#fa923f'
+                                }}>New Post</NavLink></li>
+                        </ul>
+                    </nav>
+                </header>
+                {/* <Route path="/" exact render={() => <h1>Home</h1>} />
+                <Route path="/" render={() => <h1>Home 2</h1>} /> */}
+                <Switch>
+                    <Route path="/" exact component={Posts}/>
+                    <Route path="/new-post" component={NewPost}/>
+                    <Route path="/:id" exact component={FullPost} />
+                </Switch>
             </div>
         );
     }
